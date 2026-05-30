@@ -818,6 +818,113 @@ function normRu(s) {
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=a[i];a[i]=a[j];a[j]=t;}return a;}
 
 /* ════════════════════════════════════════════════════════════
+   WORTSCHATZ — die häufigsten russischen Wörter  [ru(betont), de, Kategorie]
+════════════════════════════════════════════════════════════ */
+const VOCAB_CATS = ["Pronomen & Fragen","Funktionswörter","Verben","Substantive","Adjektive","Adverbien & Zeit","Zahlen"];
+const VOCAB = [
+  // Pronomen & Fragewörter
+  ["я","ich","Pronomen & Fragen"],["ты","du","Pronomen & Fragen"],["он","er","Pronomen & Fragen"],
+  ["она\u0301","sie","Pronomen & Fragen"],["оно\u0301","es","Pronomen & Fragen"],["мы","wir","Pronomen & Fragen"],
+  ["вы","ihr / Sie","Pronomen & Fragen"],["они\u0301","sie (Plural)","Pronomen & Fragen"],
+  ["кто","wer","Pronomen & Fragen"],["что","was","Pronomen & Fragen"],["где","wo","Pronomen & Fragen"],
+  ["когда\u0301","wann","Pronomen & Fragen"],["как","wie","Pronomen & Fragen"],["почему\u0301","warum","Pronomen & Fragen"],
+  ["кото\u0301рый","welcher","Pronomen & Fragen"],["ско\u0301лько","wie viel","Pronomen & Fragen"],
+  ["како\u0301й","was für ein","Pronomen & Fragen"],["э\u0301тот","dieser","Pronomen & Fragen"],
+  ["весь","ganz / alles","Pronomen & Fragen"],["себя\u0301","sich","Pronomen & Fragen"],
+  // Funktionswörter
+  ["и","und","Funktionswörter"],["в","in","Funktionswörter"],["не","nicht","Funktionswörter"],
+  ["на","auf / an","Funktionswörter"],["с","mit","Funktionswörter"],["по","entlang / nach","Funktionswörter"],
+  ["но","aber","Funktionswörter"],["к","zu","Funktionswörter"],["у","bei","Funktionswörter"],
+  ["из","aus","Funktionswörter"],["за","hinter / für","Funktionswörter"],["от","von","Funktionswörter"],
+  ["о","über","Funktionswörter"],["для","für","Funktionswörter"],["и\u0301ли","oder","Funktionswörter"],
+  ["да","ja","Funktionswörter"],["е\u0301сли","wenn / falls","Funktionswörter"],["что\u0301бы","damit","Funktionswörter"],
+  ["потому\u0301 что","weil","Funktionswörter"],["хотя\u0301","obwohl","Funktionswörter"],
+  ["то\u0301же","auch","Funktionswörter"],["ещё","noch","Funktionswörter"],["уже\u0301","schon","Funktionswörter"],
+  ["то\u0301лько","nur","Funktionswörter"],["без","ohne","Funktionswörter"],["при","bei / während","Funktionswörter"],
+  // Verben
+  ["быть","sein","Verben"],["де\u0301лать","machen","Verben"],["говори\u0301ть","sprechen","Verben"],
+  ["знать","wissen","Verben"],["мочь","können","Verben"],["хоте\u0301ть","wollen","Verben"],
+  ["ви\u0301деть","sehen","Verben"],["идти\u0301","gehen","Verben"],["е\u0301хать","fahren","Verben"],
+  ["дать","geben","Verben"],["взять","nehmen","Verben"],["ду\u0301мать","denken","Verben"],
+  ["рабо\u0301тать","arbeiten","Verben"],["жить","leben","Verben"],["люби\u0301ть","lieben","Verben"],
+  ["чита\u0301ть","lesen","Verben"],["писа\u0301ть","schreiben","Verben"],["есть","essen","Verben"],
+  ["пить","trinken","Verben"],["спать","schlafen","Verben"],["понима\u0301ть","verstehen","Verben"],
+  ["помога\u0301ть","helfen","Verben"],["спроси\u0301ть","fragen","Verben"],["отве\u0301тить","antworten","Verben"],
+  ["нача\u0301ть","beginnen","Verben"],["ко\u0301нчить","beenden","Verben"],["найти\u0301","finden","Verben"],
+  ["иска\u0301ть","suchen","Verben"],["ждать","warten","Verben"],["стоя\u0301ть","stehen","Verben"],
+  ["сиде\u0301ть","sitzen","Verben"],["слы\u0301шать","hören","Verben"],["смотре\u0301ть","schauen","Verben"],
+  ["купи\u0301ть","kaufen","Verben"],["плати\u0301ть","bezahlen","Verben"],["по\u0301мнить","sich erinnern","Verben"],
+  ["игра\u0301ть","spielen","Verben"],["учи\u0301ть","lernen / lehren","Verben"],["проси\u0301ть","bitten","Verben"],
+  ["ста\u0301ть","werden","Verben"],
+  // Substantive
+  ["вре\u0301мя","Zeit","Substantive"],["год","Jahr","Substantive"],["день","Tag","Substantive"],
+  ["рука\u0301","Hand","Substantive"],["де\u0301ло","Sache","Substantive"],["жизнь","Leben","Substantive"],
+  ["челове\u0301к","Mensch","Substantive"],["друг","Freund","Substantive"],["дом","Haus","Substantive"],
+  ["сло\u0301во","Wort","Substantive"],["ме\u0301сто","Ort","Substantive"],["вода\u0301","Wasser","Substantive"],
+  ["рабо\u0301та","Arbeit","Substantive"],["ма\u0301ма","Mama","Substantive"],["па\u0301па","Papa","Substantive"],
+  ["же\u0301нщина","Frau","Substantive"],["мужчи\u0301на","Mann","Substantive"],["ребёнок","Kind","Substantive"],
+  ["го\u0301род","Stadt","Substantive"],["страна\u0301","Land","Substantive"],["у\u0301лица","Straße","Substantive"],
+  ["маши\u0301на","Auto","Substantive"],["кни\u0301га","Buch","Substantive"],["де\u0301ньги","Geld","Substantive"],
+  ["и\u0301мя","Name","Substantive"],["ночь","Nacht","Substantive"],["у\u0301тро","Morgen","Substantive"],
+  ["ве\u0301чер","Abend","Substantive"],["неде\u0301ля","Woche","Substantive"],["ме\u0301сяц","Monat","Substantive"],
+  ["час","Stunde","Substantive"],["мину\u0301та","Minute","Substantive"],["голова\u0301","Kopf","Substantive"],
+  ["глаз","Auge","Substantive"],["нога\u0301","Bein / Fuß","Substantive"],["еда\u0301","Essen","Substantive"],
+  ["язы\u0301к","Sprache","Substantive"],["шко\u0301ла","Schule","Substantive"],["вопро\u0301с","Frage","Substantive"],
+  ["приме\u0301р","Beispiel","Substantive"],
+  // Adjektive
+  ["большо\u0301й","groß","Adjektive"],["ма\u0301ленький","klein","Adjektive"],["но\u0301вый","neu","Adjektive"],
+  ["ста\u0301рый","alt","Adjektive"],["хоро\u0301ший","gut","Adjektive"],["плохо\u0301й","schlecht","Adjektive"],
+  ["краси\u0301вый","schön","Adjektive"],["до\u0301брый","gut / lieb","Adjektive"],["ва\u0301жный","wichtig","Adjektive"],
+  ["лёгкий","leicht","Adjektive"],["тру\u0301дный","schwer","Adjektive"],["дли\u0301нный","lang","Adjektive"],
+  ["коро\u0301ткий","kurz","Adjektive"],["бы\u0301стрый","schnell","Adjektive"],["ме\u0301дленный","langsam","Adjektive"],
+  ["тёплый","warm","Adjektive"],["холо\u0301дный","kalt","Adjektive"],["ра\u0301зный","verschieden","Adjektive"],
+  ["после\u0301дний","letzter","Adjektive"],["пе\u0301рвый","erster","Adjektive"],
+  // Adverbien & Zeit
+  ["сейча\u0301с","jetzt","Adverbien & Zeit"],["пото\u0301м","dann","Adverbien & Zeit"],["всегда\u0301","immer","Adverbien & Zeit"],
+  ["никогда\u0301","nie","Adverbien & Zeit"],["ча\u0301сто","oft","Adverbien & Zeit"],["ре\u0301дко","selten","Adverbien & Zeit"],
+  ["сего\u0301дня","heute","Adverbien & Zeit"],["за\u0301втра","morgen","Adverbien & Zeit"],["вчера\u0301","gestern","Adverbien & Zeit"],
+  ["ра\u0301но","früh","Adverbien & Zeit"],["по\u0301здно","spät","Adverbien & Zeit"],["о\u0301чень","sehr","Adverbien & Zeit"],
+  ["хорошо\u0301","gut","Adverbien & Zeit"],["пло\u0301хо","schlecht","Adverbien & Zeit"],["мно\u0301го","viel","Adverbien & Zeit"],
+  ["ма\u0301ло","wenig","Adverbien & Zeit"],["вме\u0301сте","zusammen","Adverbien & Zeit"],["здесь","hier","Adverbien & Zeit"],
+  ["там","dort","Adverbien & Zeit"],["сра\u0301зу","sofort","Adverbien & Zeit"],
+  // Zahlen
+  ["оди\u0301н","eins","Zahlen"],["два","zwei","Zahlen"],["три","drei","Zahlen"],["четы\u0301ре","vier","Zahlen"],
+  ["пять","fünf","Zahlen"],["шесть","sechs","Zahlen"],["семь","sieben","Zahlen"],["во\u0301семь","acht","Zahlen"],
+  ["де\u0301вять","neun","Zahlen"],["де\u0301сять","zehn","Zahlen"],["сто","hundert","Zahlen"],["ты\u0301сяча","tausend","Zahlen"],
+];
+
+/* ════════════════════════════════════════════════════════════
+   WAS IST NEU — Patch Notes
+════════════════════════════════════════════════════════════ */
+const NEWS_VERSION = "1.5";
+const NEWS = [
+  { ver:"1.5", title:"Auto-Play beim Lernen", emoji:"▶️", items:[
+    "Automatischer Modus im Lern-Player — kein Antippen jedes Satzes mehr.",
+    "Deutsch UND Russisch werden nacheinander vorgelesen (bei RU→DE umgekehrt).",
+    "Pause zwischen Sätzen frei wählbar in Sekunden (0–30).",
+    "🔁 Dauerschleife: am Themenende geht es von vorne los.",
+  ]},
+  { ver:"1.4", title:"Fix: Alphabet-Quiz", emoji:"🛠️", items:[
+    "Behoben: die richtige Antwort war sichtbar (kyrillischer Name enthielt den Buchstaben).",
+    "Optionen zeigen jetzt Transliteration + Lauthinweis statt des Namens.",
+    "Frage umformuliert; Optionen haben eindeutige Transliterationen.",
+  ]},
+  { ver:"1.3", title:"Lautstärke & Wortschatz", emoji:"📒", items:[
+    "Klick-Lautstärke deutlich reduziert (zentraler Master-Regler).",
+    "Neues Modul Wortschatz: 178 der häufigsten Wörter mit Betonung.",
+    "7 Kategorien mit Filter, dazu Karten- und Quiz-Modus.",
+  ]},
+  { ver:"1.2", title:"Mehr Klang-Stile", emoji:"🎚️", items:[
+    "Vier Klick-Stile: 🖱️ Klick, 🪵 Tock, 💧 Pop, 🎵 Blip.",
+    "Auswahl in den Einstellungen mit Sofort-Vorschau.",
+  ]},
+  { ver:"1.1", title:"Button-Sounds", emoji:"🔊", items:[
+    "Klick-Ton bei jedem Button (per Web Audio, keine Dateien).",
+    "Abschaltbar unter Werkzeuge → Einstellungen.",
+  ]},
+];
+
+/* ════════════════════════════════════════════════════════════
    APP
 ════════════════════════════════════════════════════════════ */
 function App() {
@@ -839,12 +946,92 @@ function App() {
   const [todayDate, setTodayDate] = useState("");
   const goal = 20;
   const [levelsPassed, setLevelsPassed] = useState({}); // {B1:true,...}
+  const [newsSeen, setNewsSeen] = useState(NEWS_VERSION);
 
   // voices
   const ruVoice = useRef(null);
   const deVoice = useRef(null);
   const [noRuVoice, setNoRuVoice] = useState(false);
   const speedRef = useRef(0.9);
+
+  // button click sound (Web Audio, no files) — mehrere Stile
+  const [soundOn, setSoundOn] = useState(true);
+  const [soundKind, setSoundKind] = useState("click"); // click | tock | pop | blip
+  const soundOnRef = useRef(true);
+  const soundKindRef = useRef("click");
+  const audioCtx = useRef(null);
+  const master = useRef(null);
+  const noiseBuf = useRef(null);
+  const getCtx = () => {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    if (!audioCtx.current) {
+      audioCtx.current = new AC();
+      master.current = audioCtx.current.createGain();
+      master.current.gain.value = 0.34; // Gesamtlautstärke der Klicks
+      master.current.connect(audioCtx.current.destination);
+    }
+    const ac = audioCtx.current;
+    if (ac.state === "suspended") ac.resume();
+    return ac;
+  };
+  const out = () => master.current || (audioCtx.current && audioCtx.current.destination);
+  const getNoise = (ac) => {
+    if (!noiseBuf.current) {
+      const b = ac.createBuffer(1, Math.floor(ac.sampleRate * 0.05), ac.sampleRate);
+      const d = b.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      noiseBuf.current = b;
+    }
+    return noiseBuf.current;
+  };
+  // a satisfying mechanical mouse-click: sharp noise transient + short low body
+  const clickMech = (ac, hpFreq, bodyFreq, vol) => {
+    const t = ac.currentTime;
+    const src = ac.createBufferSource(); src.buffer = getNoise(ac);
+    const hp = ac.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = hpFreq;
+    const g = ac.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.55 * vol, t + 0.001);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.028);
+    src.connect(hp); hp.connect(g); g.connect(out());
+    src.start(t); src.stop(t + 0.05);
+    const o = ac.createOscillator(); o.type = "sine";
+    o.frequency.setValueAtTime(bodyFreq, t);
+    o.frequency.exponentialRampToValueAtTime(bodyFreq * 0.5, t + 0.03);
+    const g2 = ac.createGain();
+    g2.gain.setValueAtTime(0.0001, t);
+    g2.gain.exponentialRampToValueAtTime(0.22 * vol, t + 0.002);
+    g2.gain.exponentialRampToValueAtTime(0.0001, t + 0.045);
+    o.connect(g2); g2.connect(out()); o.start(t); o.stop(t + 0.06);
+  };
+  const tone = (ac, type, f0, f1, peak, dur) => {
+    const t = ac.currentTime;
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.type = type; o.frequency.setValueAtTime(f0, t);
+    o.frequency.exponentialRampToValueAtTime(f1, t + dur * 0.8);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(peak, t + 0.004);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(out()); o.start(t); o.stop(t + dur + 0.01);
+  };
+  const playSound = (kindOverride) => {
+    if (!soundOnRef.current && !kindOverride) return;
+    try {
+      const ac = getCtx(); if (!ac) return;
+      const k = kindOverride || soundKindRef.current;
+      if (k === "click") clickMech(ac, 1800, 170, 1);
+      else if (k === "tock") clickMech(ac, 900, 110, 0.95);
+      else if (k === "pop") tone(ac, "sine", 760, 300, 0.16, 0.07);
+      else tone(ac, "triangle", 520, 340, 0.1, 0.09); // blip
+    } catch (e) {}
+  };
+  const playClick = () => playSound();
+  useEffect(() => {
+    const handler = (e) => { if (e.target && e.target.closest && e.target.closest("button")) playClick(); };
+    document.addEventListener("click", handler, true);
+    return () => document.removeEventListener("click", handler, true);
+  }, []);
   useEffect(() => { speedRef.current = speed; }, [speed]);
 
   /* ── Theme tokens ──────────────────────────────────────── */
@@ -924,18 +1111,49 @@ function App() {
     } catch(e){}
   };
 
+  // speak several items in order, call onDone after the last; returns a cancel fn
+  const speakSeq = (items, onDone) => {
+    const synth = window.speechSynthesis;
+    if (!synth) { onDone && onDone(); return () => {}; }
+    if (!ruVoice.current || !deVoice.current) refreshVoices();
+    let i = 0, cancelled = false;
+    const next = () => {
+      if (cancelled) return;
+      if (i >= items.length) { onDone && onDone(); return; }
+      const it = items[i++];
+      try {
+        const u = new SpeechSynthesisUtterance(stripStress(it.text));
+        u.lang = it.lang === "ru" ? "ru-RU" : "de-DE";
+        u.rate = it.lang === "ru" ? speedRef.current : 1;
+        const v = it.lang === "ru" ? ruVoice.current : deVoice.current;
+        if (v) u.voice = v;
+        u.onend = () => { if (!cancelled) next(); };
+        u.onerror = () => { if (!cancelled) next(); };
+        synth.speak(u);
+      } catch(e) { if (!cancelled) next(); }
+    };
+    try { synth.cancel(); } catch(e){}
+    setTimeout(() => { if (!cancelled) { try { synth.resume(); } catch(e){} next(); } }, 60);
+    return () => { cancelled = true; try { synth.cancel(); } catch(e){} };
+  };
+
   /* ── Load / save progress ──────────────────────────────── */
   useEffect(() => {
     (async () => {
       try { const s = await window.storage.get("settings:dark"); if (s) setDark(s.value === "true"); } catch(e){}
       try { const s = await window.storage.get("settings:stress"); if (s) setShowStress(s.value !== "false"); } catch(e){}
+      try { const s = await window.storage.get("settings:sound"); if (s) { const on = s.value !== "false"; setSoundOn(on); soundOnRef.current = on; } } catch(e){}
+      try { const s = await window.storage.get("settings:soundkind"); if (s && s.value) { setSoundKind(s.value); soundKindRef.current = s.value; } } catch(e){}
       try { const s = await window.storage.get("prog:seen"); if (s) setSeen(JSON.parse(s.value)); } catch(e){}
       try { const s = await window.storage.get("prog:streak"); if (s) setStreak(+s.value||0); } catch(e){}
       try { const s = await window.storage.get("prog:lastDate"); if (s) setLastDate(s.value); } catch(e){}
       try { const s = await window.storage.get("prog:today"); if (s){ const o=JSON.parse(s.value); setTodayDate(o.d); setTodayCount(o.c); } } catch(e){}
       try { const s = await window.storage.get("prog:levels"); if (s) setLevelsPassed(JSON.parse(s.value)); } catch(e){}
+      try { const s = await window.storage.get("settings:newsver"); setNewsSeen(s && s.value ? s.value : "0"); } catch(e){ setNewsSeen("0"); }
     })();
   }, []);
+  const markNewsSeen = () => { setNewsSeen(NEWS_VERSION); window.storage.set("settings:newsver", NEWS_VERSION).catch(()=>{}); };
+  const newsUnseen = newsSeen !== NEWS_VERSION;
   const markLevelPassed = (L) => setLevelsPassed(prev => { const n = { ...prev, [L]: true }; window.storage.set("prog:levels", JSON.stringify(n)).catch(()=>{}); return n; });
   const reachedLevel = (() => { let r="—"; for (const L of LEVELS_ORDER){ if (levelsPassed[L]) r=L; else break; } return r; })();
   const today = () => new Date().toISOString().slice(0,10);
@@ -967,6 +1185,8 @@ function App() {
 
   const toggleDark = () => { const n=!dark; setDark(n); window.storage.set("settings:dark",String(n)).catch(()=>{}); };
   const toggleStress = () => { const n=!showStress; setShowStress(n); window.storage.set("settings:stress",String(n)).catch(()=>{}); };
+  const toggleSound = () => { const n=!soundOn; setSoundOn(n); soundOnRef.current=n; window.storage.set("settings:sound",String(n)).catch(()=>{}); if(n) playSound(soundKindRef.current); };
+  const chooseSound = (k) => { setSoundKind(k); soundKindRef.current=k; window.storage.set("settings:soundkind",k).catch(()=>{}); playSound(k); };
 
   /* ── Gemini helper ─────────────────────────────────────── */
   const gemini = async (prompt) => {
@@ -986,18 +1206,20 @@ function App() {
   /* ── shared render of a russian phrase (stress on/off) ──── */
   const ru = (text, style) => h("span", { style }, showStress ? text : stripStress(text));
 
-  const ctx = { dark, showStress, ru, speak, setScreen, screen, gemini, toggleDark, toggleStress, speed, setSpeed, noRuVoice, levelsPassed, markLevelPassed };
+  const ctx = { dark, showStress, ru, speak, speakSeq, setScreen, screen, gemini, toggleDark, toggleStress, speed, setSpeed, noRuVoice, levelsPassed, markLevelPassed, soundOn, toggleSound, soundKind, chooseSound };
 
   /* ── routing (render as components so each keeps its own hooks) ── */
   let body;
   if (screen === "study")        body = h(StudyScreen, { ...ctx, tIdx, sIdx, setSIdx, revealed, setRevealed, markSeen, seen });
   else if (screen === "topics")  body = h(TopicsScreen, { ...ctx, setTIdx, setSIdx, setRevealed, seen });
   else if (screen === "alphabet")body = h(AlphabetScreen, ctx);
+  else if (screen === "vocab")   body = h(VocabScreen, ctx);
   else if (screen === "verbs")   body = h(VerbsScreen, ctx);
   else if (screen === "quiz")    body = h(QuizScreen, ctx);
   else if (screen === "level")   body = h(LevelScreen, ctx);
   else if (screen === "tools")   body = h(ToolsScreen, ctx);
-  else                           body = h(MenuScreen, { ...ctx, streak, totalSeen, todayCount, goal, reachedLevel, setTIdx, setSIdx, setRevealed });
+  else if (screen === "news")    body = h(NewsScreen, ctx);
+  else                           body = h(MenuScreen, { ...ctx, streak, totalSeen, todayCount, goal, reachedLevel, newsUnseen, markNewsSeen, setTIdx, setSIdx, setRevealed });
 
   return h("div", { "data-page": screen, style:{ maxWidth:520, margin:"0 auto", padding:"22px 18px 110px", minHeight:"100vh" } },
     body,
@@ -1043,14 +1265,24 @@ function BottomNav({ screen, setScreen, dark }) {
    MENU / DASHBOARD
 ════════════════════════════════════════════════════════════ */
 function MenuScreen(p) {
-  const { setScreen, streak, totalSeen, todayCount, goal, reachedLevel } = p;
+  const { setScreen, streak, totalSeen, todayCount, goal, reachedLevel, newsUnseen, markNewsSeen } = p;
   const pct = Math.min(100, Math.round(todayCount / goal * 100));
   return h("div", null,
     h("div", { style:{ display:"flex", alignItems:"baseline", justifyContent:"space-between", marginBottom:6 } },
       h("h1", { style:{ ...serif, fontSize:34, fontWeight:600, margin:0, letterSpacing:"-.5px" } }, "Ру\u0301сский"),
       h("span", { style:{ color:"var(--text-faint)", fontSize:12, letterSpacing:2, textTransform:"uppercase" } }, "Deutsch · Russisch")
     ),
-    h("p", { style:{ color:"var(--text-sub)", fontSize:14, margin:"0 0 18px" } }, "Lerne Russisch — Sätze, Alphabet und Verben."),
+    h("p", { style:{ color:"var(--text-sub)", fontSize:14, margin:"0 0 14px" } }, "Lerne Russisch — Sätze, Alphabet und Verben."),
+
+    h("button",{ onClick:()=>{ markNewsSeen && markNewsSeen(); setScreen("news"); },
+      style:{ ...card, width:"100%", display:"flex", alignItems:"center", gap:10, padding:"11px 14px", marginBottom:16,
+        cursor:"pointer", color:"var(--text)", textAlign:"left",
+        border:"1px solid "+(newsUnseen?"var(--accent)":"var(--border)") } },
+      h("span",{style:{fontSize:16}},"✨"),
+      h("span",{style:{fontWeight:700,fontSize:13.5}},"Was ist neu"),
+      newsUnseen ? h("span",{style:{fontSize:10.5,fontWeight:800,padding:"2px 8px",borderRadius:"var(--r-full)",background:"var(--accent)",color:"#0b0e14"}},"NEU") : null,
+      h("span",{style:{marginLeft:"auto",color:"var(--text-faint)",fontSize:18}},"›")
+    ),
 
     // stats row
     h("div", { style:{ display:"flex", gap:10, marginBottom:16 } },
@@ -1073,6 +1305,7 @@ function MenuScreen(p) {
     h("div", { style:{ fontSize:13, fontWeight:700, color:"var(--text-sub)", margin:"0 0 10px", letterSpacing:.3 } }, "WEITERMACHEN"),
     [["📚","Sätze lernen","DE↔RU, 10 Themen, mit Audio","topics","#818cf8"],
      ["🔤","Alphabet","Kyrillisch — Karten & Quiz","alphabet","#22c55e"],
+     ["📒","Wortschatz","Die häufigsten Wörter (Karten & Quiz)","vocab","#0ea5e9"],
      ["🔧","Verben","Konjugation üben","verbs","#f59e0b"],
      ["🎯","Quiz","Vokabeln testen","quiz","#ec4899"],
      ["🏆","Niveau-Test","Dein Niveau: "+(reachedLevel||"—")+" (B1–C2)","level","#eab308"],
@@ -1118,9 +1351,14 @@ function TopicsScreen(p) {
    STUDY PLAYER
 ════════════════════════════════════════════════════════════ */
 function StudyScreen(p) {
-  const { setScreen, tIdx, sIdx, setSIdx, revealed, setRevealed, ru, speak, markSeen,
+  const { setScreen, tIdx, sIdx, setSIdx, revealed, setRevealed, ru, speak, speakSeq, markSeen,
           showStress, toggleStress, speed, setSpeed, noRuVoice } = p;
   const [dir, setDir] = useState("de2ru"); // de2ru | ru2de
+  const [auto, setAuto] = useState(false);
+  const [gap, setGap] = useState(3);     // Pause in Sekunden zwischen Sätzen
+  const [loop, setLoop] = useState(false);
+  const loopRef = useRef(false); useEffect(()=>{ loopRef.current = loop; }, [loop]);
+  const gapRef = useRef(3);     useEffect(()=>{ gapRef.current = gap; }, [gap]);
   const topic = TOPICS[tIdx];
   const pair = topic.sentences[sIdx];
   const [de, rus] = pair;
@@ -1132,6 +1370,27 @@ function StudyScreen(p) {
     setSIdx(n); setRevealed(false);
   };
   const reveal = () => { if (!revealed) { setRevealed(true); markSeen(tIdx, sIdx); speak(rus,"ru"); } };
+
+  // Auto-Play: liest Deutsch + Russisch, wartet, geht weiter (optional Dauerschleife)
+  useEffect(() => {
+    if (!auto) return;
+    let cancelled = false, gapTimer = null, stop = null;
+    setRevealed(true);
+    markSeen(tIdx, sIdx);
+    const items = dir === "ru2de"
+      ? [{ text: rus, lang: "ru" }, { text: de, lang: "de" }]
+      : [{ text: de, lang: "de" }, { text: rus, lang: "ru" }];
+    stop = speakSeq(items, () => {
+      if (cancelled) return;
+      gapTimer = setTimeout(() => {
+        if (cancelled) return;
+        if (sIdx + 1 < topic.sentences.length) { setRevealed(false); setSIdx(sIdx + 1); }
+        else if (loopRef.current) { setRevealed(false); setSIdx(0); }
+        else { setAuto(false); }
+      }, Math.max(0, gapRef.current) * 1000);
+    });
+    return () => { cancelled = true; if (gapTimer) clearTimeout(gapTimer); if (stop) stop(); };
+  }, [auto, sIdx, tIdx]);
 
   const promptIsRu = dir === "ru2de";
   const promptLabel = promptIsRu ? "Russisch" : "Deutsch";
@@ -1181,6 +1440,27 @@ function StudyScreen(p) {
       h("button",{onClick:()=>go(-1),disabled:sIdx===0,style:{...card,flex:1,padding:14,cursor:"pointer",color:"var(--text)",fontWeight:700,fontSize:15}},"‹ Zurück"),
       h("button",{onClick:()=>go(1),disabled:sIdx===topic.sentences.length-1,style:{...card,flex:1,padding:14,cursor:"pointer",color:"var(--text)",fontWeight:700,fontSize:15}},"Weiter ›")
     ),
+    // auto-play
+    h("div",{style:{...card,padding:"14px 16px",marginBottom:12}},
+      h("div",{style:{display:"flex",gap:10,alignItems:"center"}},
+        h("button",{onClick:()=>setAuto(a=>!a),
+          style:{...pill(auto),flex:1,padding:"13px 16px",fontSize:15}}, auto?"⏸ Pause":"▶ Auto-Play"),
+        h("button",{onClick:()=>setLoop(l=>!l),title:"Dauerschleife",
+          style:{...pill(loop),padding:"13px 15px",fontSize:16}}, "🔁")
+      ),
+      h("div",{style:{display:"flex",alignItems:"center",gap:10,marginTop:12}},
+        h("span",{style:{fontSize:13,color:"var(--text-sub)",fontWeight:700}},"Pause"),
+        h("input",{type:"number",min:0,max:30,step:0.5,value:gap,
+          onChange:e=>setGap(Math.max(0, Math.min(30, parseFloat(e.target.value)||0))),
+          style:{width:62,padding:"8px 10px",borderRadius:"var(--r-sm)",border:"1px solid var(--border)",
+            background:"var(--card)",color:"var(--text)",fontSize:15,fontFamily:"inherit",textAlign:"center"}}),
+        h("span",{style:{fontSize:13,color:"var(--text-sub)"}},"Sek. zwischen Sätzen"),
+        h("span",{style:{marginLeft:"auto",fontSize:12,fontWeight:700,color:auto?"var(--accent-bright)":(loop?"var(--text-faint)":"transparent")}},
+          auto?"läuft…":(loop?"Schleife an":""))
+      ),
+      h("div",{style:{fontSize:11.5,color:"var(--text-faint)",marginTop:8,lineHeight:1.4}},
+        "Liest automatisch "+(dir==="ru2de"?"Russisch → Deutsch":"Deutsch → Russisch")+" vor und blättert weiter.")
+    ),
     // speed
     h("div",{style:{...card,padding:"12px 16px",display:"flex",alignItems:"center",gap:12}},
       h("span",{style:{fontSize:13,color:"var(--text-sub)",fontWeight:700}},"Tempo"),
@@ -1207,9 +1487,10 @@ function AlphabetScreen(p) {
   const newQ = () => {
     const correct = ALPHABET[Math.floor(Math.random()*ALPHABET.length)];
     const opts = [correct];
-    while (opts.length < 4) {
+    let guard = 0;
+    while (opts.length < 4 && guard++ < 200) {
       const c = ALPHABET[Math.floor(Math.random()*ALPHABET.length)];
-      if (!opts.find(o=>o[0]===c[0])) opts.push(c);
+      if (!opts.find(o => o[0]===c[0] || o[3]===c[3])) opts.push(c);
     }
     opts.sort(()=>Math.random()-0.5);
     setQ({ correct, opts }); setPick(null);
@@ -1258,7 +1539,7 @@ function AlphabetScreen(p) {
   if (!q) return h("div",null, Header("Алфави\u0301т"), tabBar);
   const ask = q.correct;
   return h("div",null,
-    Header("Alphabet-Quiz","Welcher Buchstabe ist das? · "+qScore.c+"/"+qScore.t),
+    Header("Alphabet-Quiz","Wie wird dieser Buchstabe gelesen? · "+qScore.c+"/"+qScore.t),
     tabBar,
     h("div",{style:{...card,padding:"34px 22px",textAlign:"center",marginBottom:18}},
       h("div",{style:{...serif,fontSize:78,fontWeight:600,lineHeight:1}}, ask[0]+" "+ask[1]),
@@ -1273,10 +1554,10 @@ function AlphabetScreen(p) {
         }
         return h("button",{ key:idx, disabled:pick!==null,
           onClick:()=>{ setPick(o); setQScore(s=>({c:s.c+(o[0]===ask[0]?1:0),t:s.t+1})); },
-          style:{ padding:"16px 12px", borderRadius:"var(--r-md)", border:"1.5px solid "+bc, background:bg,
+          style:{ padding:"14px 12px", borderRadius:"var(--r-md)", border:"1.5px solid "+bc, background:bg,
             color:"var(--text)", cursor:"pointer", textAlign:"center" } },
-          h("div",{style:{fontSize:13,color:"var(--accent-bright)",fontWeight:700}},"["+o[3]+"]"),
-          ru(o[2],{...serif,fontSize:17,fontWeight:600,display:"block",marginTop:2})
+          h("div",{style:{fontSize:20,color:"var(--accent-bright)",fontWeight:800,fontFamily:"'Fraunces',serif"}}, o[3]),
+          h("div",{style:{fontSize:11.5,color:"var(--text-sub)",marginTop:3,lineHeight:1.3}}, o[4])
         );
       })
     ),
@@ -1403,7 +1684,7 @@ function QuizScreen(p) {
    WERKZEUGE — KI (Generator · Partner · Analyse) + Einstellungen
 ════════════════════════════════════════════════════════════ */
 function ToolsScreen(p) {
-  const { gemini, ru, speak, dark, toggleDark, showStress, toggleStress } = p;
+  const { gemini, ru, speak, dark, toggleDark, showStress, toggleStress, soundOn, toggleSound, soundKind, chooseSound } = p;
   const [tab, setTab] = useState("generate");
 
   // generator
@@ -1504,12 +1785,23 @@ function ToolsScreen(p) {
     ) : null,
 
     tab==="settings" ? h("div",null,
-      [["🌙","Dunkler Modus",dark,toggleDark],["Бе́","Betonung anzeigen",showStress,toggleStress]].map(([ic,l,on,fn],i)=>
+      [["🌙","Dunkler Modus",dark,toggleDark],["Бе́","Betonung anzeigen",showStress,toggleStress],["🔊","Tasten-Sound",soundOn,toggleSound]].map(([ic,l,on,fn],i)=>
         h("div",{key:i,style:{...card,padding:"14px 16px",display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}},
           h("div",{style:{display:"flex",alignItems:"center",gap:12}},h("span",{style:{fontSize:18}},ic),h("span",{style:{fontWeight:700}},l)),
           h("button",{onClick:fn,style:{width:50,height:28,borderRadius:99,border:"none",cursor:"pointer",position:"relative",
             background:on?"var(--accent)":"var(--border)"}},
             h("div",{style:{position:"absolute",top:3,left:on?25:3,width:22,height:22,borderRadius:99,background:"#fff",transition:"left .2s"}})))),
+      soundOn ? h("div",{style:{...card,padding:"14px 16px",marginBottom:10}},
+        h("div",{style:{fontWeight:700,marginBottom:10,fontSize:14}},"Klang-Stil"),
+        h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}},
+          [["click","🖱️ Klick"],["tock","🪵 Tock"],["pop","💧 Pop"],["blip","🎵 Blip"]].map(([k,lbl])=>
+            h("button",{key:k,onClick:()=>chooseSound(k),
+              style:{padding:"11px 10px",borderRadius:"var(--r-md)",cursor:"pointer",fontWeight:700,fontSize:13.5,
+                border:"1.5px solid "+(soundKind===k?"var(--accent)":"var(--border)"),
+                background:soundKind===k?"var(--accent-soft)":"var(--card)",
+                color:soundKind===k?"var(--accent-bright)":"var(--text)"}}, lbl))),
+        h("div",{style:{fontSize:12,color:"var(--text-faint)",marginTop:8}},"Tippen zum Anhören.")
+      ) : null,
       h("div",{style:{...card,padding:"14px 16px"}},
         h("div",{style:{fontWeight:700,marginBottom:6}},"🔑 API-Key"),
         h("div",{style:{fontSize:13,color:"var(--text-sub)",lineHeight:1.5}},"Den Gemini-Key verwaltest du über das 🔑-Symbol unten links. Er wird nur lokal gespeichert."))
@@ -1686,6 +1978,122 @@ function LevelScreen(p) {
   );
 }
 
+
+/* ════════════════════════════════════════════════════════════
+   WORTSCHATZ — Karteikarten + Quiz (häufigste Wörter)
+════════════════════════════════════════════════════════════ */
+function VocabScreen(p) {
+  const { ru, speak } = p;
+  const [mode, setMode] = useState("cards"); // cards | quiz
+  const [cat, setCat] = useState("Alle");
+  const [i, setI] = useState(0);
+  const [flip, setFlip] = useState(false);
+  const [q, setQ] = useState(null);
+  const [pick, setPick] = useState(null);
+  const [score, setScore] = useState({c:0,t:0});
+
+  const list = cat === "Alle" ? VOCAB : VOCAB.filter(v => v[2] === cat);
+  const idx = Math.min(i, list.length - 1);
+
+  const newQ = () => {
+    const pool = list.length >= 4 ? list : VOCAB;
+    const correct = pool[Math.floor(Math.random()*pool.length)];
+    const opts = [correct];
+    while (opts.length < 4) {
+      const c = VOCAB[Math.floor(Math.random()*VOCAB.length)];
+      if (!opts.find(o => o[1] === c[1])) opts.push(c);
+    }
+    opts.sort(()=>Math.random()-0.5);
+    setQ({ correct, opts }); setPick(null);
+  };
+  useEffect(()=>{ if (mode==="quiz") newQ(); }, [mode, cat]);
+
+  const chips = h("div",{style:{display:"flex",gap:7,overflowX:"auto",paddingBottom:6,marginBottom:14,WebkitOverflowScrolling:"touch"}},
+    ["Alle",...VOCAB_CATS].map(c =>
+      h("button",{key:c,onClick:()=>{setCat(c);setI(0);setFlip(false);},
+        style:{...pill(cat===c),whiteSpace:"nowrap",flexShrink:0,fontSize:12.5,padding:"7px 13px"}}, c)));
+
+  const tabBar = h("div",{style:{display:"flex",gap:8,marginBottom:12}},
+    h("button",{onClick:()=>setMode("cards"),style:pill(mode==="cards")},"🃏 Karten"),
+    h("button",{onClick:()=>setMode("quiz"),style:pill(mode==="quiz")},"🎯 Quiz")
+  );
+
+  if (mode === "cards") {
+    const w = list[idx] || VOCAB[0];
+    return h("div",null,
+      Header("Wortschatz","Die häufigsten Wörter · "+(idx+1)+" / "+list.length),
+      tabBar, chips,
+      h("div",{ onClick:()=>{ setFlip(!flip); if(!flip) speak(w[0],"ru"); },
+        style:{ ...card, padding:"40px 22px", minHeight:200, display:"flex", flexDirection:"column",
+          alignItems:"center", justifyContent:"center", cursor:"pointer", textAlign:"center", marginBottom:16 } },
+        !flip
+          ? h("div",null,
+              ru(w[0],{...serif,fontSize:38,fontWeight:600,lineHeight:1.15,display:"block"}),
+              h("div",{style:{color:"var(--text-faint)",marginTop:14,fontSize:13}},"Tippen zum Umdrehen"))
+          : h("div",null,
+              h("div",{style:{fontSize:12,color:"var(--text-faint)",textTransform:"uppercase",letterSpacing:1}},"Deutsch"),
+              h("div",{style:{...serif,fontSize:30,fontWeight:600,margin:"4px 0 8px"}}, w[1]),
+              h("div",{style:{fontSize:12,color:"var(--accent-bright)",fontWeight:700}}, w[2]),
+              ru(w[0],{fontSize:16,color:"var(--text-sub)",marginTop:10,display:"block"}),
+              h("button",{onClick:e=>{e.stopPropagation();speak(w[0],"ru");},style:{...pill(false),marginTop:12}},"🔊"))
+      ),
+      h("div",{style:{display:"flex",gap:10}},
+        h("button",{onClick:()=>{setI((idx-1+list.length)%list.length);setFlip(false);},style:{...card,flex:1,padding:14,cursor:"pointer",color:"var(--text)",fontWeight:700}},"‹"),
+        h("button",{onClick:()=>{speak(w[0],"ru");},style:{...card,flex:1,padding:14,cursor:"pointer",color:"var(--text)",fontWeight:700}},"🔊"),
+        h("button",{onClick:()=>{setI(Math.floor(Math.random()*list.length));setFlip(false);},style:{...card,flex:1,padding:14,cursor:"pointer",color:"var(--text)",fontWeight:700}},"🔀"),
+        h("button",{onClick:()=>{setI((idx+1)%list.length);setFlip(false);},style:{...card,flex:1,padding:14,cursor:"pointer",color:"var(--text)",fontWeight:700}},"›")
+      )
+    );
+  }
+
+  if (!q) return h("div",null, Header("Wortschatz"), tabBar, chips);
+  const ask = q.correct;
+  return h("div",null,
+    Header("Wortschatz-Quiz","Was bedeutet das Wort? · "+score.c+"/"+score.t),
+    tabBar, chips,
+    h("div",{style:{...card,padding:"30px 22px",textAlign:"center",marginBottom:18}},
+      ru(ask[0],{...serif,fontSize:34,fontWeight:600,display:"block"}),
+      h("button",{onClick:()=>speak(ask[0],"ru"),style:{...pill(false),marginTop:12}},"🔊 Anhören")
+    ),
+    h("div",{style:{display:"flex",flexDirection:"column",gap:10}},
+      q.opts.map((o,k)=>{
+        let bg="var(--card)", bc="var(--border)";
+        if (pick!==null){ if(o[1]===ask[1]){bg="#22c55e22";bc="#22c55e";} else if(o[1]===pick[1]){bg="#ef444422";bc="#ef4444";} }
+        return h("button",{key:k,disabled:pick!==null,
+          onClick:()=>{ setPick(o); const ok=o[1]===ask[1]; setScore(s=>({c:s.c+(ok?1:0),t:s.t+1})); if(ok) speak(ask[0],"ru"); },
+          style:{padding:"15px 16px",borderRadius:"var(--r-md)",border:"1.5px solid "+bc,background:bg,color:"var(--text)",cursor:"pointer",textAlign:"left",fontSize:16,fontWeight:600}},
+          o[1])
+      })
+    ),
+    pick!==null ? h("button",{onClick:newQ,style:{...pill(true),width:"100%",padding:14,marginTop:16,fontSize:15}},"Nächste ›") : null
+  );
+}
+
+/* ════════════════════════════════════════════════════════════
+   WAS IST NEU
+════════════════════════════════════════════════════════════ */
+function NewsScreen(p) {
+  const { setScreen } = p;
+  return h("div", null,
+    h("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16}},
+      h("button",{onClick:()=>setScreen("menu"),style:{...pill(false),padding:"6px 12px"}},"‹ Start"),
+      h("div",{style:{fontWeight:700}},"Was ist neu"),
+      h("div",{style:{width:60}})
+    ),
+    NEWS.map((n,i)=>
+      h("div",{key:i,style:{...card,padding:"16px 18px",marginBottom:12}},
+        h("div",{style:{display:"flex",alignItems:"center",gap:10,marginBottom:8}},
+          h("span",{style:{fontSize:20}},n.emoji),
+          h("div",{style:{...serif,fontSize:17,fontWeight:700}},n.title),
+          h("span",{style:{marginLeft:"auto",fontSize:11.5,fontWeight:700,padding:"2px 9px",borderRadius:"var(--r-full)",
+            background:i===0?"var(--accent)":"var(--accent-soft)",color:i===0?"#0b0e14":"var(--accent-bright)"}}, "v"+n.ver)),
+        n.items.map((it,k)=>
+          h("div",{key:k,style:{display:"flex",gap:8,fontSize:13.5,color:"var(--text-sub)",lineHeight:1.5,marginTop:4}},
+            h("span",{style:{color:"var(--accent-bright)"}},"•"),
+            h("span",null,it)))
+      ))
+  );
+}
 
 const st = document.createElement("style");
 st.textContent = `@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
